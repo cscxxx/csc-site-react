@@ -1,0 +1,149 @@
+@import '@/styles/variables.less';
+
+.pageContainer {
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
+  width: 100%;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.backButton {
+  margin-bottom: @spacing-xs;
+}
+
+.blogCard {
+  border: none;
+  box-shadow: none;
+  
+  :global(.ant-card-body) {
+    padding: @spacing-sm;
+  }
+}
+
+.blogHeader {
+  margin-bottom: @spacing-sm;
+  padding-bottom: @spacing-xs;
+  border-bottom: 1px solid @border-color-split;
+}
+
+.blogTitle {
+  margin: 0 0 @spacing-xs 0;
+  font-size: @font-size-xl;
+  font-weight: 600;
+  color: @text-color;
+  line-height: 1.3;
+}
+
+.blogMeta {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  font-size: @font-size-sm;
+  color: @text-color-secondary;
+}
+
+.blogCategory {
+  padding: 2px 8px;
+  background-color: @bg-layout;
+  border-radius: @border-radius-sm;
+  color: @text-color-secondary;
+}
+
+.blogDate {
+  color: @text-color-secondary;
+}
+
+.blogThumb {
+  margin-bottom: @spacing-sm;
+  border-radius: @border-radius-base;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: @bg-layout;
+
+  :global(.ant-image) {
+    display: block;
+
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+  }
+}
+
+.blogDescription {
+  margin-bottom: @spacing-sm;
+  padding: @spacing-xs @spacing-sm;
+  background-color: @bg-layout;
+  border-radius: @border-radius-base;
+  font-size: @font-size-sm;
+  color: @text-color-secondary;
+  line-height: 1.5;
+}
+
+.blogContent {
+  margin-top: @spacing-sm;
+
+  // 使用 github-markdown-css 样式，保持与编辑器一致
+  // 图片保持原始大小和位置
+  // 紧凑化 markdown 内容的间距
+  :global {
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: @spacing-md;
+      margin-bottom: @spacing-xs;
+    }
+
+    h1:first-child,
+    h2:first-child,
+    h3:first-child,
+    h4:first-child,
+    h5:first-child,
+    h6:first-child {
+      margin-top: 0;
+    }
+
+    p {
+      margin-bottom: @spacing-xs;
+    }
+
+    p:last-child {
+      margin-bottom: 0;
+    }
+
+    ul, ol {
+      margin-bottom: @spacing-xs;
+      padding-left: @spacing-md;
+    }
+
+    li {
+      margin-bottom: 2px;
+    }
+
+    blockquote {
+      margin: @spacing-xs 0;
+      padding: @spacing-xs @spacing-sm;
+    }
+
+    pre {
+      margin-bottom: @spacing-xs;
+      padding: @spacing-xs @spacing-sm;
+    }
+
+    table {
+      margin-bottom: @spacing-xs;
+    }
+
+    img {
+      margin: @spacing-xs 0;
+    }
+  }
+}

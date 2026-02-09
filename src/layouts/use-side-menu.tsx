@@ -15,7 +15,7 @@ import {
   InfoCircleOutlined,
   MessageOutlined,
   ProjectOutlined,
-  FolderOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
 
 export function useSideMenu(): MenuProps['items'] {
@@ -27,19 +27,14 @@ export function useSideMenu(): MenuProps['items'] {
         label: '仪表盘',
       },
       {
-        key: 'article',
-        icon: <FolderOutlined />,
-        label: '文章管理',
-        children: [
-          { key: '/blogtype', label: '文章分类' },
-          { key: '/blog', label: '文章列表' },
-          { key: '/blog/edit', label: '新增与编辑文章' },
-        ],
+        key: '/blog',
+        icon: <FileTextOutlined />,
+        label: '文章列表',
       },
       {
-        key: '/banner',
+        key: '/home',
         icon: <FileTextOutlined />,
-        label: '首页标语',
+        label: '首页',
       },
       {
         key: '/message',
@@ -75,6 +70,20 @@ export function useSideMenu(): MenuProps['items'] {
         key: '/performance',
         icon: <BarChartOutlined />,
         label: '性能监控',
+      },
+      {
+        type: 'divider',
+      },
+      {
+        key: '/admin',
+        icon: <UserOutlined />,
+        label: '个人中心',
+      },
+      {
+        key: 'logout',
+        icon: <LogoutOutlined />,
+        label: '退出登录',
+        danger: true,
       },
     ],
     []

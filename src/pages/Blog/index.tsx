@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Table, Input, Button, Space, Select, App } from 'antd';
-import { SearchOutlined, PlusOutlined } from '@ant-design/icons';
-import { getBlogList, deleteBlog } from './service';
+import { Input, Button, Space, List, Row, Col, App, Image, Pagination } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { getBlogList } from './service';
 import { getBlogtypeList } from '@/pages/Blogtype/service';
-import { useBlogColumns } from './use-columns';
 import type { BlogItem, BlogListParams } from './types.ts';
 import type { BlogtypeItem } from '@/pages/Blogtype/types';
 import styles from './index.module.less';
@@ -13,7 +12,7 @@ const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 10;
 
 function Blog() {
-  const { message, modal } = App.useApp();
+  const { message } = App.useApp();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -91,109 +90,137 @@ function Blog() {
     setParams({ categoryid: value, page: 1 });
   };
 
-  const handleTableChange = (pagination: { current?: number; pageSize?: number }) => {
-    const nextPage = pagination.current ?? page;
-    const nextLimit = pagination.pageSize ?? limit;
+  const handleView = (record: BlogItem) => {
+    navigate(`/blog/${record.id}`);
+  };
+
+  const handlePaginationChange = (newPage: number, newPageSize: number) => {
     setSearchParams(
       prev => {
         const next = new URLSearchParams(prev);
-        next.set('page', String(nextPage));
-        next.set('limit', String(nextLimit));
+        next.set('page', String(newPage));
+        next.set('limit', String(newPageSize));
         return next;
       },
       { replace: true }
     );
   };
 
-  const handleAdd = () => {
-    navigate('/blog/edit');
-  };
-
-  const handleEdit = (record: BlogItem) => {
-    navigate(`/blog/edit/${record.id}`);
-  };
-
-  const handleDelete = (record: BlogItem) => {
-    modal.confirm({
-      title: '确认删除',
-      content: `确定要删除文章「${record.title}」吗？`,
-      okText: '确认',
-      cancelText: '取消',
-      okType: 'danger',
-      onOk: async () => {
-        try {
-          await deleteBlog(record.id);
-          message.success('删除成功');
-          await fetchList();
-        } catch (err) {
-          message.error(err instanceof Error ? err.message : '删除失败');
-          throw err;
-        }
-      },
+  const formatDate = (timestamp: number) => {
+    if (!timestamp || isNaN(timestamp)) {
+      return '未知日期';
+    }
+    // 如果时间戳是秒级，转换为毫秒级
+    const timestampMs = timestamp < 10000000000 ? timestamp * 1000 : timestamp;
+    const date = new Date(timestampMs);
+    if (isNaN(date.getTime())) {
+      return '未知日期';
+    }
+    return date.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
     });
   };
 
-  const columns = useBlogColumns({
-    categoryMap,
-    onEdit: handleEdit,
-    onDelete: handleDelete,
-  });
-
-  const categoryOptions = useMemo(
-    () => categories.map(c => ({ value: c.id, label: c.name })),
-    [categories]
-  );
-
   return (
     <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>文章</h1>
-      <div className={styles.toolbar}>
-        <Space wrap>
-          <Input
-            className={styles.searchInput}
-            placeholder="关键词搜索"
-            value={keywordInput}
-            onChange={e => setKeywordInput(e.target.value)}
-            onPressEnter={handleSearch}
-            allowClear
+      <Row gutter={24}>
+        {/* 左侧：文章列表区域 */}
+        <Col flex={1} className={styles.articleListCol}>
+          <div className={styles.toolbar}>
+            <Space wrap>
+              <Input
+                className={styles.searchInput}
+                placeholder="关键词搜索"
+                value={keywordInput}
+                onChange={e => setKeywordInput(e.target.value)}
+                onPressEnter={handleSearch}
+                allowClear
+              />
+              <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
+                搜索
+              </Button>
+            </Space>
+          </div>
+          <List<BlogItem>
+            className={styles.articleList}
+            loading={loading}
+            dataSource={list}
+            renderItem={(item) => (
+              <List.Item
+                className={styles.articleItem}
+                onClick={() => handleView(item)}
+              >
+                <div className={styles.articleContent}>
+                  {item.thumb && (
+                    <div className={styles.articleThumb}>
+                      <Image
+                        src={item.thumb}
+                        alt={item.title}
+                        preview={false}
+                        width={120}
+                        height={80}
+                        style={{ objectFit: 'cover' }}
+                      />
+                    </div>
+                  )}
+                  <div className={styles.articleInfo}>
+                    <h3 className={styles.articleTitle}>{item.title}</h3>
+                    <p className={styles.articleDescription}>{item.description}</p>
+                    <div className={styles.articleMeta}>
+                      <span className={styles.articleCategory}>
+                        {categoryMap.get(item.categoryId) || '未分类'}
+                      </span>
+                      <span className={styles.articleDate}>
+                        {formatDate(item.createDate)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </List.Item>
+            )}
           />
-          <Select
-            className={styles.categorySelect}
-            placeholder="分类（可清空为全部）"
-            value={categoryid ?? undefined}
-            onChange={handleCategoryChange}
-            options={categoryOptions}
-            allowClear
-          />
-          <Button type="primary" icon={<SearchOutlined />} onClick={handleSearch}>
-            搜索
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-            新增
-          </Button>
-        </Space>
-      </div>
-      <Table<BlogItem>
-        columns={columns}
-        dataSource={list}
-        rowKey="id"
-        loading={loading}
-        pagination={{
-          current: page,
-          pageSize: limit,
-          total,
-          showSizeChanger: true,
-          showTotal: t => `共 ${t} 条`,
-          pageSizeOptions: ['10', '20', '50'],
-        }}
-        onChange={pagination => {
-          handleTableChange({
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-          });
-        }}
-        scroll={{ x: 800 }}
-      />
+          {total > 0 && (
+            <div className={styles.pagination}>
+              <Pagination
+                current={page}
+                pageSize={limit}
+                total={total}
+                showSizeChanger
+                showTotal={(t) => `共 ${t} 条`}
+                pageSizeOptions={['10', '20', '50']}
+                onChange={handlePaginationChange}
+                onShowSizeChange={handlePaginationChange}
+              />
+            </div>
+          )}
+        </Col>
+
+        {/* 右侧：分类侧边栏 */}
+        <Col className={styles.categorySidebarCol}>
+          <div className={styles.categorySidebar}>
+            <h3 className={styles.categoryTitle}>文章分类</h3>
+            <div className={styles.categoryList}>
+              <div
+                className={`${styles.categoryItem} ${categoryid === undefined ? styles.active : ''}`}
+                onClick={() => handleCategoryChange(undefined)}
+              >
+                全部
+              </div>
+              {categories.map((category) => (
+                <div
+                  key={category.id}
+                  className={`${styles.categoryItem} ${categoryid === category.id ? styles.active : ''}`}
+                  onClick={() => handleCategoryChange(category.id)}
+                >
+                  {category.name}
+                </div>
+              ))}
+            </div>
+          </div>
+        </Col>
+      </Row>
     </div>
   );
 }

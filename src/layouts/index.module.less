@@ -4,28 +4,204 @@
   width: 100%;
   height: 100vh;
   overflow: hidden;
-}
-
-.header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: @text-color-light-solid;
-  height: @header-height;
-  padding-inline: 50px;
-  background-color: @primary-color;
 }
 
-.headerTitle {
+.sider {
+  height: 100vh;
+  background-color: @bg-layout;
+  border-right: 1px solid @border-color-split;
+  overflow: hidden;
+
+  :global(.ant-layout-sider-children) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  :global(.ant-layout-sider-trigger) {
+    display: none;
+  }
+}
+
+.siderInner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.siderTitle {
+  flex-shrink: 0;
+  padding: @spacing-lg @spacing-md;
   font-size: @font-size-xl;
   font-weight: bold;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background-color: @primary-color;
+  color: @text-color-light-solid;
+  border-bottom: 1px solid @border-color-split;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 64px;
+}
+
+.titleContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.titleIcon {
+  font-size: @font-size-xl;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  transition: opacity 0.2s ease;
+}
+
+.siderFooter {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid @border-color-split;
+  background-color: @bg-layout;
+}
+
+.footer {
+  flex-shrink: 0;
+  padding: @spacing-sm @spacing-md;
+  text-align: center;
+  font-size: @font-size-sm;
+  color: @text-color-light-solid;
+  background-color: @primary-color;
+  transition: opacity 0.2s ease, height 0.2s ease;
+}
+
+.collapseBtn {
+  width: 100%;
+  height: 48px;
+  color: @text-color-secondary !important;
+  padding: 0 @spacing-md;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: @spacing-sm;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  // 背景渐变效果
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent 0%, @primary-color-light 50%, transparent 100%);
+    opacity: 0;
+    transform: translateX(-100%);
+    transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  // 背景色层
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: @primary-color-light;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    z-index: 0;
+  }
+
+  &:hover {
+    color: @primary-color !important;
+    background-color: transparent;
+
+    &::before {
+      opacity: 0.6;
+      transform: translateX(100%);
+    }
+
+    &::after {
+      opacity: 1;
+    }
+
+    :global(.anticon) {
+      transform: scale(1.15) rotate(5deg);
+      color: @primary-color;
+    }
+
+    .collapseBtnText {
+      color: @primary-color;
+      transform: translateX(2px);
+    }
+  }
+
+  &:active {
+    &::after {
+      opacity: 0.8;
+    }
+
+    :global(.anticon) {
+      transform: scale(1.05) rotate(0deg);
+    }
+
+    .collapseBtnText {
+      transform: translateX(0);
+    }
+  }
+
+  :global(.anticon) {
+    font-size: 18px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+
+  // 折叠状态下的样式
+  &.collapsed {
+    width: 64px;
+    padding: 0;
+    justify-content: center;
+
+    &:hover {
+      :global(.anticon) {
+        transform: scale(1.2) rotate(0deg);
+      }
+    }
+  }
+}
+
+.collapseBtnText {
+  font-size: @font-size-md;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 500;
+
+  .collapseBtn.collapsed & {
+    opacity: 0;
+    width: 0;
+    transform: translateX(-10px);
+  }
 }
 
 .titleWord {
@@ -38,64 +214,17 @@
   width: 0.5em;
 }
 
-.headerUserTrigger {
-  cursor: pointer;
-  padding: @spacing-xs @spacing-sm;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  border-radius: @border-radius-base;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.9;
-  }
-}
-
-.headerAvatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  object-fit: cover;
-  vertical-align: middle;
-}
-
-.bodyWrap {
-  margin-top: @header-height;
-  display: flex;
-  width: 100%;
-  height: calc(100vh - @header-height);
-  overflow: hidden;
-}
-
-.sider {
-  flex: 0 0 @sider-width;
-  height: 100%;
-  background-color: @bg-layout;
-  border-right: 1px solid @border-color-split;
-
-  :global(.ant-layout-sider-children) {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-}
-
-.siderInner {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-}
-
 .menu {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   border-right: 0;
   background: transparent !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   :global(.ant-menu-item) {
     color: @text-color-secondary;
+    transition: all 0.2s ease;
   }
 
   :global(.ant-menu-item:hover) {
@@ -107,15 +236,21 @@
     color: @primary-color !important;
     background-color: @primary-color-light !important;
   }
-}
 
-.footer {
-  flex-shrink: 0;
-  padding: @spacing-sm @spacing-md;
-  text-align: center;
-  font-size: @font-size-sm;
-  color: @text-color-light-solid;
-  background-color: @primary-color;
+  // 折叠状态下的样式
+  :global(.ant-menu-inline-collapsed) {
+    width: 64px;
+
+    :global(.ant-menu-item) {
+      padding: 0 20px !important;
+      text-align: center;
+    }
+
+    :global(.ant-menu-submenu-title) {
+      padding: 0 20px !important;
+      text-align: center;
+    }
+  }
 }
 
 .content {

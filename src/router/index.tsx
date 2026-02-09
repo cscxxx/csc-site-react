@@ -28,14 +28,13 @@ const CursorGuide = lazy(() => import('@/pages/CursorGuide'));
 const Settings = lazy(() => import('@/pages/Settings'));
 const Mock = lazy(() => import('@/pages/Mock'));
 const Performance = lazy(() => import('@/pages/Performance'));
-const Banner = lazy(() => import('@/pages/Banner'));
+const Home = lazy(() => import('@/pages/Home'));
 const Admin = lazy(() => import('@/pages/Admin'));
 const About = lazy(() => import('@/pages/About'));
 const Message = lazy(() => import('@/pages/Message'));
 const Project = lazy(() => import('@/pages/Project'));
-const Blogtype = lazy(() => import('@/pages/Blogtype/index.tsx'));
 const Blog = lazy(() => import('@/pages/Blog/index.tsx'));
-const BlogEditPage = lazy(() => import('@/pages/Blog/BlogEditPage/index.tsx'));
+const BlogDetailPage = lazy(() => import('@/pages/Blog/BlogDetailPage/index.tsx'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 
 export const router = createBrowserRouter([
@@ -90,8 +89,8 @@ export const router = createBrowserRouter([
         element: <LazyRoute component={Performance} />,
       },
       {
-        path: 'banner',
-        element: <LazyRoute component={Banner} />,
+        path: 'home',
+        element: <LazyRoute component={Home} />,
       },
       {
         path: 'about',
@@ -106,20 +105,12 @@ export const router = createBrowserRouter([
         element: <LazyRoute component={Project} />,
       },
       {
-        path: 'blogtype',
-        element: <LazyRoute component={Blogtype} />,
-      },
-      {
         path: 'blog',
         element: <LazyRoute component={Blog} />,
       },
       {
-        path: 'blog/edit',
-        element: <LazyRoute component={BlogEditPage} />,
-      },
-      {
-        path: 'blog/edit/:id',
-        element: <LazyRoute component={BlogEditPage} />,
+        path: 'blog/:id',
+        element: <LazyRoute component={BlogDetailPage} />,
       },
     ],
   },

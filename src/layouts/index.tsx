@@ -1,15 +1,13 @@
-import { useRef, useMemo, useState } from 'react';
-import { Layout, Menu, Dropdown, theme } from 'antd';
-import type { MenuProps } from 'antd';
+import { useRef, useState } from 'react';
+import { Layout, Menu, theme, Button } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { DownOutlined } from '@ant-design/icons';
 import { useAuthStore, useSettingStore } from '@/store';
 import { useTitleAnimation } from './use-anime';
-import { useHeaderMenu } from './use-header-menu.tsx';
 import { useSideMenu } from './use-side-menu.tsx';
 import styles from './index.module.less';
 
-const { Header, Footer, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
 
 function AppLayout() {
   const navigate = useNavigate();
@@ -32,10 +30,14 @@ function AppLayout() {
   });
 
   const menuItems = useSideMenu();
-  const headerMenuItems = useHeaderMenu();
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    // 仅对带路径的叶子项导航，父项（如 article）点击只展开/收起，不跳转
+    // 处理退出登录
+    if (key === 'logout') {
+      handleLogout();
+      return;
+    }
+    // 仅对带路径的菜单项导航
     if (key.startsWith('/')) {
       navigate(key);
     }
@@ -47,93 +49,71 @@ function AppLayout() {
     navigate('/login', { replace: true });
   };
 
-  const onHeaderMenuClick: MenuProps['onClick'] = ({ key }) => {
-    if (key === 'logout') {
-      handleLogout();
-    } else if (key === 'admin') {
-      navigate('/admin');
-    } else if (key === 'settings') {
-      navigate('/settings');
-    }
-  };
+  const selectedKeys = [location.pathname];
 
-  // /blog/edit 或 /blog/edit/:id 时高亮「新增与编辑文章」
-  const selectedKeys =
-    location.pathname === '/blog/edit' || location.pathname.startsWith('/blog/edit/')
-      ? ['/blog/edit']
-      : [location.pathname];
-
-  // 侧栏子菜单展开：路径在 blogtype/blog 下时强制展开「文章管理」；否则用用户点击的展开状态
-  const pathnameOpenKeys = useMemo(
-    () =>
-      location.pathname.startsWith('/blogtype') || location.pathname.startsWith('/blog')
-        ? ['article']
-        : [],
-    [location.pathname]
-  );
   const [userOpenKeys, setUserOpenKeys] = useState<string[]>([]);
-  const openKeys = pathnameOpenKeys.length > 0 ? pathnameOpenKeys : userOpenKeys;
-
-  // 头部下拉：当前在个人中心/设置页时高亮对应菜单项
-  const headerSelectedKeys =
-    location.pathname === '/admin'
-      ? ['admin']
-      : location.pathname === '/settings'
-        ? ['settings']
-        : [];
+  const openKeys = userOpenKeys;
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <Layout className={styles.layout}>
-      <Header className={styles.header}>
-        <div className={styles.headerTitle}>
-          <span ref={cscRef} className={styles.titleWord}>
-            CSC
-          </span>
-          <span className={styles.titleSpace}> </span>
-          <span ref={siteRef} className={styles.titleWord}>
-            Site
-          </span>
-        </div>
-        <Dropdown
-          trigger={['hover']}
-          popupRender={() => (
-            <Menu
-              selectedKeys={headerSelectedKeys}
-              items={headerMenuItems}
-              onClick={onHeaderMenuClick}
-              style={{ minWidth: 160 }}
-            />
-          )}
-        >
-          <span className={styles.headerUserTrigger} style={{ color: token.colorTextLightSolid }}>
-            {setting?.avatar ? (
-              <img src={setting.avatar} alt="头像" className={styles.headerAvatar} />
-            ) : (
-              <span>欢迎，管理员</span>
-            )}
-            <DownOutlined />
-          </span>
-        </Dropdown>
-      </Header>
-      <div className={styles.bodyWrap}>
-        <Sider width={200} className={styles.sider}>
-          <div className={styles.siderInner}>
-            <Menu
-              mode="inline"
-              selectedKeys={selectedKeys}
-              openKeys={openKeys}
-              onOpenChange={setUserOpenKeys}
-              items={menuItems}
-              onClick={handleMenuClick}
-              className={styles.menu}
-            />
-            <Footer className={styles.footer}>{setting?.icp ?? 'Footer © 2026 CSC Site'}</Footer>
+      <Sider
+        width={200}
+        collapsed={collapsed}
+        collapsedWidth={64}
+        collapsible
+        trigger={null}
+        className={styles.sider}
+        style={{
+          transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
+      >
+        <div className={styles.siderInner}>
+          <div className={styles.siderTitle}>
+            <div className={styles.titleContent}>
+              {!collapsed ? (
+                <>
+                  <span ref={cscRef} className={styles.titleWord}>
+                    CSC
+                  </span>
+                  <span className={styles.titleSpace}> </span>
+                  <span ref={siteRef} className={styles.titleWord}>
+                    Site
+                  </span>
+                </>
+              ) : (
+                <span className={styles.titleIcon}>C</span>
+              )}
+            </div>
           </div>
-        </Sider>
-        <Content className={styles.content}>
-          <Outlet />
-        </Content>
-      </div>
+          <Menu
+            mode="inline"
+            inlineCollapsed={collapsed}
+            selectedKeys={selectedKeys}
+            openKeys={openKeys}
+            onOpenChange={setUserOpenKeys}
+            items={menuItems}
+            onClick={handleMenuClick}
+            className={styles.menu}
+          />
+          <div className={styles.siderFooter}>
+            {!collapsed && (
+              <div className={styles.footer}>{setting?.icp ?? 'Footer © 2026 CSC Site'}</div>
+            )}
+            <Button
+              type="text"
+              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              onClick={() => setCollapsed(!collapsed)}
+              className={`${styles.collapseBtn} ${collapsed ? styles.collapsed : ''}`}
+            >
+              {!collapsed && <span className={styles.collapseBtnText}>折叠</span>}
+            </Button>
+          </div>
+        </div>
+      </Sider>
+      <Content className={styles.content}>
+        <Outlet />
+      </Content>
     </Layout>
   );
 }
