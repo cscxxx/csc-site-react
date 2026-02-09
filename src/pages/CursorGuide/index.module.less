@@ -1,0 +1,76 @@
+@import '@/styles/variables.less';
+
+.pageContainer {
+  width: 100%;
+  min-width: 0;
+  padding: @spacing-md;
+  box-sizing: border-box;
+}
+
+.pageTitle {
+  margin-bottom: @spacing-sm !important;
+  font-size: @font-size-xl;
+  font-weight: bold;
+}
+
+.intro {
+  margin-bottom: @spacing-lg;
+  color: @text-color-secondary;
+}
+
+.sectionCard {
+  margin-bottom: @spacing-md;
+
+  :global(.ant-card-head-title) {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.cardIcon {
+  margin-right: @spacing-sm;
+  color: @primary-color;
+}
+
+.summaryCard {
+  margin-top: @spacing-lg;
+  background-color: @bg-layout;
+}
+
+.subIntro {
+  margin-bottom: @spacing-md;
+  color: @text-color-secondary;
+  font-size: @font-size-md;
+}
+
+.docList {
+  margin: 0;
+  padding-left: 1.25em;
+  color: @text-color;
+
+  li {
+    margin-bottom: @spacing-sm;
+    line-height: 1.6;
+
+    code {
+      font-size: @font-size-sm;
+    }
+
+    em {
+      margin-left: @spacing-xs;
+      color: @text-color-secondary;
+      font-style: normal;
+      font-size: @font-size-sm;
+    }
+  }
+}
+
+.summaryList {
+  margin: 0;
+  padding-left: 1.25em;
+  color: @text-color-secondary;
+
+  li {
+    margin-bottom: @spacing-xs;
+  }
+}

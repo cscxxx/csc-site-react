@@ -1,0 +1,118 @@
+@import '@/styles/variables.less';
+
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: @spacing-md;
+  /* 不限制高度与 overflow，让内容自然增高，由 Layout Content 的滚动条滚动 */
+}
+
+.pageHeader {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: @spacing-md;
+  margin-bottom: @spacing-md;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: @font-size-xl;
+  font-weight: bold;
+}
+
+.fullscreenBtn {
+  flex-shrink: 0;
+}
+
+/* 全屏模式：通过 Portal 挂到 body，避免被布局的 overflow/stacking 限制 */
+.fullscreenPortal {
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: var(--ant-color-bg-container, #fff);
+  overflow: auto;
+}
+
+.pageContainer.fullscreen {
+  height: 100%;
+  min-height: 100%;
+  padding: @spacing-md;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-height: 0;
+}
+
+.metaCard {
+  flex-shrink: 0;
+  margin-bottom: @spacing-md;
+
+  :global(.ant-card-body) {
+    padding: @spacing-md;
+  }
+}
+
+.footerCard {
+  flex-shrink: 0;
+  margin-top: @spacing-md;
+
+  :global(.ant-card-body) {
+    padding: @spacing-md;
+  }
+}
+
+.footerRow {
+  display: flex;
+  gap: @spacing-md;
+  margin-bottom: @spacing-md;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.categoryItem {
+  width: 160px;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.thumbItem {
+  width: 164px;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.contentCard {
+  flex: 1 0 auto;
+  min-height: 320px;
+  /* 不设 overflow，让卡片随编辑器内容增高，由 Content 滚动 */
+
+  :global(.ant-card-body) {
+    padding: @spacing-md;
+  }
+}
+
+.htmlContentItem {
+  margin-bottom: 0;
+
+  :global(.ant-form-item-control-input-content) {
+    display: block;
+  }
+}
+

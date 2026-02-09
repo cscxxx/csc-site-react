@@ -1,0 +1,67 @@
+{
+  "name": "csc-site-react",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,less,md}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,less,md}\"",
+    "preview": "vite preview",
+    "build:preview": "pnpm build && pnpm preview",
+    "prepare": "husky install",
+    "commitlint": "commitlint --edit",
+    "lint-staged": "lint-staged"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^6.1.0",
+    "@mdxeditor/editor": "^3.52.3",
+    "ahooks": "^3.9.6",
+    "antd": "^6.2.3",
+    "dayjs": "^1.11.19",
+    "gsap": "^3.12.5",
+    "marked": "^17.0.1",
+    "mockjs": "^1.1.0",
+    "numeral": "^2.0.6",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.0",
+    "github-markdown-css": "^5.6.0",
+    "turndown": "^7.2.2",
+    "web-vitals": "^4.2.4",
+    "zustand": "^5.0.11"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@eslint/js": "^9.39.1",
+    "@tailwindcss/vite": "^4.1.18",
+    "@types/mockjs": "^1.0.10",
+    "@types/node": "^24.10.1",
+    "@types/numeral": "^2.0.5",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.0.1",
+    "eslint-plugin-react-refresh": "^0.4.24",
+    "globals": "^16.5.0",
+    "husky": "^9.0.0",
+    "less": "^4.5.1",
+    "lint-staged": "^15.0.0",
+    "prettier": "^3.8.1",
+    "tailwindcss": "^4.1.18",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vite": "npm:rolldown-vite@7.2.5",
+    "vite-plugin-mock": "^3.0.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "npm:rolldown-vite@7.2.5"
+    }
+  }
+}

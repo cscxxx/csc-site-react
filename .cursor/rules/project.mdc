@@ -1,0 +1,53 @@
+---
+description: '项目特定规范，包括技术栈、状态管理、路由和请求处理'
+alwaysApply: true
+---
+
+# 项目特定规范
+
+## 技术栈
+
+- React 19.2.0
+- Ant Design 6.2.3
+- TypeScript 5.9.3
+- React Router DOM 7.13.0
+- Zustand 5.0.11
+- ahooks（Hooks 工具库）
+- Vite
+- Tailwind CSS 4（简单样式统一用 utility class）；必要时 Less 模块化
+
+## 状态管理（Zustand）
+
+- 使用 `create` 创建 store
+- 使用 `persist` middleware 持久化状态
+- Store 文件以 `*Store.ts` 命名
+- 使用 selector 选择需要的状态，避免不必要的重渲染
+
+## 路由（React Router DOM v7）
+
+- 使用 `createBrowserRouter` 创建路由
+- 使用 `React.lazy` 进行路由懒加载
+- 使用 `LazyRoute` 组件包装懒加载路由
+- 受保护路由使用 `ProtectedRoute` 组件
+- 使用 `useNavigate` Hook 进行编程式导航
+
+## ahooks 使用
+
+- 异步请求、列表加载等优先使用 `useRequest`，配合 `@/utils/request` 与 `service.ts` 中的 API 函数
+- 防抖、节流使用 `useDebounceFn`、`useThrottleFn`，避免手写 setTimeout/setInterval
+- 其他场景按需使用：`useDebounce`/`useThrottle`（值）、`useMemoizedFn`（稳定回调）、`useMount`/`useUnmount` 等
+- 从 `ahooks` 按需导入，例如：`import { useRequest, useDebounceFn } from 'ahooks'`
+
+## 请求处理
+
+- 使用项目自定义的 `request` 工具（`@/utils/request`）
+- API 服务函数放在 `service.ts` 文件中
+- 定义请求和响应的 TypeScript 接口
+- 处理错误响应，显示友好的错误提示
+- 使用全局错误处理机制
+
+## 代码提交
+
+- 使用 Conventional Commits 规范
+- 类型：`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`
+- 格式：`<type>(<scope>): <subject>`

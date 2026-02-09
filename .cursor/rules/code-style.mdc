@@ -1,0 +1,40 @@
+---
+description: "代码风格和命名规范，包括文件组织、样式文件和命名约定"
+alwaysApply: true
+---
+
+# 代码风格
+
+## 文件组织
+- 页面组件放在 `src/pages/` 目录
+- 通用组件放在 `src/components/` 目录
+- 工具函数放在 `src/utils/` 目录
+- 类型定义放在 `src/types/` 或与文件同目录的 `types.ts`
+- Store 放在 `src/store/` 目录
+
+## 配置与逻辑抽离（use* 形式）
+- 菜单项、表格列、列表配置等与页面主逻辑分离，抽离为自定义 Hook，便于维护
+- **文件命名**：短横线分割（kebab-case），如 `use-header-menu.tsx`、`use-side-menu.tsx`、`use-columns.tsx`
+- **Hook 命名**：camelCase，以 `use` 开头，如 `useHeaderMenu`、`useSideMenu`、`useColumns`
+- **扩展名**：含 JSX 时用 `.tsx`，仅类型/逻辑用 `.ts`
+- **引用**：若项目开启 `allowImportingTsExtensions`，导入时写完整扩展名（如 `./use-header-menu.tsx`），避免解析到错误文件
+- 抽离文件与使用方同目录或按功能放在子目录（如 `pages/Banner/use-columns.tsx`）
+
+## 样式（Tailwind CSS）
+- **统一使用 Tailwind CSS** 编写简单样式，直接在 JSX 上使用 `className` 工具类
+- 布局与间距：`flex`、`grid`、`gap-*`、`p-*`、`m-*`、`w-full`、`min-w-0` 等
+- 响应式：`max-md:*`、`max-sm:*` 等断点前缀
+- 仅在需要复杂选择器、主题变量或与 Ant Design 深度定制时，才使用 Less 模块（`.module.less`），且与组件同名、`import styles from './index.module.less'`
+- 全局设计变量仍可参考 `@/styles/variables.less`
+
+## 命名规范
+- 组件：PascalCase（`UserProfile`）
+- 函数/变量：camelCase（`getUserInfo`）
+- 常量：UPPER_SNAKE_CASE（`API_BASE_URL`）
+- 类型/接口：PascalCase（`UserInfo`）
+- 文件：kebab-case 或与导出内容一致（`user-profile.tsx` 或 `UserProfile.tsx`）
+
+## 代码注释
+- 使用 JSDoc 注释为函数和类添加文档
+- 复杂逻辑添加行内注释
+- 使用中文注释说明业务逻辑
