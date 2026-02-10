@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
-import { Layout, Menu, theme, Button } from 'antd';
+import { useState, useEffect } from 'react';
+import { Layout, Menu, Button, Popover } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useRequest } from 'ahooks';
 import { useSettingStore } from '@/store';
-import { useTitleAnimation } from './use-anime';
+import { getSetting } from '@/services/setting';
 import { useSideMenu } from './use-side-menu.tsx';
 import styles from './index.module.less';
 
@@ -13,19 +14,18 @@ function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const setting = useSettingStore(state => state.setting);
-  const { token } = theme.useToken();
+  const setSetting = useSettingStore(state => state.setSetting);
 
-  const cscRef = useRef<HTMLSpanElement>(null);
-  const siteRef = useRef<HTMLSpanElement>(null);
-
-  // 标题两词使用主题色（浅色字 + 主色浅底）
-  const titleColors = [token.colorTextLightSolid, token.colorPrimaryBg];
-
-  useTitleAnimation([cscRef, siteRef], titleColors, {
-    duration: 0.6,
-    jumpHeight: -15,
-    delay: 0.15,
+  // 初次访问时拉取设置并写入 store
+  const { run: fetchSetting } = useRequest(getSetting, {
+    manual: true,
+    onSuccess: data => setSetting(data),
   });
+  useEffect(() => {
+    if (!setting) {
+      fetchSetting();
+    }
+  }, [setting, fetchSetting]);
 
   const menuItems = useSideMenu();
 
@@ -55,23 +55,126 @@ function AppLayout() {
         }}
       >
         <div className={styles.siderInner}>
-          <div className={styles.siderTitle}>
-            <div className={styles.titleContent}>
+          {setting && (
+            <div className={styles.settingBlock}>
               {!collapsed ? (
                 <>
-                  <span ref={cscRef} className={styles.titleWord}>
-                    CSC
-                  </span>
-                  <span className={styles.titleSpace}> </span>
-                  <span ref={siteRef} className={styles.titleWord}>
-                    Site
-                  </span>
+                  <div className={styles.settingProfile}>
+                    {setting.avatar ? (
+                      <img src={setting.avatar} alt="" className={styles.settingAvatar} />
+                    ) : null}
+                    <span className={styles.settingSiteTitle}>{setting.siteTitle}</span>
+                  </div>
+                  <div className={styles.settingContact}>
+                    {setting.qq ? (
+                      <Popover
+                        trigger="hover"
+                        content={
+                          setting.qqQrCode ? (
+                            <img src={setting.qqQrCode} alt="QQ" className={styles.settingQrImg} />
+                          ) : (
+                            setting.qq
+                          )
+                        }
+                      >
+                        <span className={styles.settingContactItem}>QQ</span>
+                      </Popover>
+                    ) : null}
+                    {setting.weixin ? (
+                      <Popover
+                        trigger="hover"
+                        content={
+                          setting.weixinQrCode ? (
+                            <img
+                              src={setting.weixinQrCode}
+                              alt="微信"
+                              className={styles.settingQrImg}
+                            />
+                          ) : (
+                            setting.weixin
+                          )
+                        }
+                      >
+                        <span className={styles.settingContactItem}>微信</span>
+                      </Popover>
+                    ) : null}
+                    {setting.github ? (
+                      <a
+                        href={setting.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.settingContactLink}
+                      >
+                        GitHub
+                      </a>
+                    ) : null}
+                    {setting.mail ? (
+                      <a href={`mailto:${setting.mail}`} className={styles.settingContactLink}>
+                        邮箱
+                      </a>
+                    ) : null}
+                  </div>
                 </>
               ) : (
-                <span className={styles.titleIcon}>C</span>
+                <Popover
+                  trigger="hover"
+                  placement="right"
+                  content={
+                    <div className={styles.settingPopoverContent}>
+                      {setting.avatar ? (
+                        <img src={setting.avatar} alt="" className={styles.settingQrImg} />
+                      ) : null}
+                      <div>{setting.siteTitle}</div>
+                      {setting.qq && (
+                        <Popover
+                          trigger="hover"
+                          content={
+                            setting.qqQrCode ? (
+                              <img
+                                src={setting.qqQrCode}
+                                alt="QQ"
+                                className={styles.settingQrImg}
+                              />
+                            ) : (
+                              setting.qq
+                            )
+                          }
+                        >
+                          <span className={styles.settingContactItem}>QQ</span>
+                        </Popover>
+                      )}
+                      {setting.weixin && (
+                        <Popover
+                          trigger="hover"
+                          content={
+                            setting.weixinQrCode ? (
+                              <img
+                                src={setting.weixinQrCode}
+                                alt="微信"
+                                className={styles.settingQrImg}
+                              />
+                            ) : (
+                              setting.weixin
+                            )
+                          }
+                        >
+                          <span className={styles.settingContactItem}>微信</span>
+                        </Popover>
+                      )}
+                    </div>
+                  }
+                >
+                  <div className={styles.settingCollapsed}>
+                    {setting.avatar ? (
+                      <img src={setting.avatar} alt="" className={styles.settingAvatarSmall} />
+                    ) : (
+                      <span className={styles.settingAvatarPlaceholder}>?</span>
+                    )}
+                  </div>
+                </Popover>
               )}
             </div>
-          </div>
+          )}
           <Menu
             mode="inline"
             inlineCollapsed={collapsed}

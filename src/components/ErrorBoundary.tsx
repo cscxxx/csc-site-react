@@ -103,7 +103,7 @@ function ErrorFallback({ error, errorInfo, onReset }: ErrorFallbackProps) {
 
   const handleGoHome = () => {
     onReset();
-    navigate('/dashboard', { replace: true });
+    navigate('/home', { replace: true });
   };
 
   const handleReload = () => {

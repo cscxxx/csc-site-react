@@ -23,8 +23,6 @@ import LazyRoute, { LoadingFallback } from '@/components/LazyRoute';
 // 路由懒加载：使用 React.lazy 动态导入页面组件
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
 const CursorGuide = lazy(() => import('@/pages/CursorGuide'));
-const Settings = lazy(() => import('@/pages/Settings'));
-const Mock = lazy(() => import('@/pages/Mock'));
 const Performance = lazy(() => import('@/pages/Performance'));
 const Home = lazy(() => import('@/pages/Home'));
 const About = lazy(() => import('@/pages/About'));
@@ -41,8 +39,12 @@ export const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       {
+        path: 'home',
+        element: <LazyRoute component={Home} />,
+      },
+      {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/home" replace />,
       },
       {
         path: 'dashboard',
@@ -57,21 +59,10 @@ export const router = createBrowserRouter([
         element: <LazyRoute component={CursorGuide} />,
       },
       {
-        path: 'settings',
-        element: <LazyRoute component={Settings} />,
-      },
-      {
-        path: 'mock',
-        element: <LazyRoute component={Mock} />,
-      },
-      {
         path: 'performance',
         element: <LazyRoute component={Performance} />,
       },
-      {
-        path: 'home',
-        element: <LazyRoute component={Home} />,
-      },
+
       {
         path: 'about',
         element: <LazyRoute component={About} />,

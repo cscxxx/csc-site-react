@@ -31,40 +31,6 @@
   min-height: 0;
 }
 
-.siderTitle {
-  flex-shrink: 0;
-  padding: @spacing-lg @spacing-md;
-  font-size: @font-size-xl;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: @primary-color;
-  color: @text-color-light-solid;
-  border-bottom: 1px solid @border-color-split;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  min-height: 64px;
-}
-
-.titleContent {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  overflow: hidden;
-}
-
-.titleIcon {
-  font-size: @font-size-xl;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  transition: opacity 0.2s ease;
-}
-
 .siderFooter {
   flex-shrink: 0;
   display: flex;
@@ -204,14 +170,101 @@
   }
 }
 
-.titleWord {
-  display: inline-block;
-  transition: color 0.3s ease;
+// 设置信息块（头像、标题、联系方式，hover 展示二维码）
+.settingBlock {
+  flex-shrink: 0;
+  padding: @spacing-md;
+  border-bottom: 1px solid @border-color-split;
+  background-color: @bg-layout;
 }
 
-.titleSpace {
-  display: inline-block;
-  width: 0.5em;
+.settingProfile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: @spacing-sm;
+  margin-bottom: @spacing-sm;
+}
+
+.settingAvatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.settingAvatarSmall {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+}
+
+.settingAvatarPlaceholder {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: @primary-color-light;
+  color: @primary-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: @font-size-sm;
+}
+
+.settingSiteTitle {
+  font-size: @font-size-md;
+  font-weight: 500;
+  color: @text-color;
+  text-align: center;
+  word-break: break-all;
+}
+
+.settingContact {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: @spacing-xs @spacing-sm;
+  font-size: @font-size-sm;
+}
+
+.settingContactItem {
+  color: @primary-color;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.settingContactLink {
+  color: @primary-color;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.settingQrImg {
+  display: block;
+  width: 160px;
+  height: auto;
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.settingPopoverContent {
+  min-width: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: @spacing-xs;
+}
+
+.settingCollapsed {
+  display: flex;
+  justify-content: center;
+  padding: @spacing-sm 0;
+  cursor: pointer;
 }
 
 .menu {

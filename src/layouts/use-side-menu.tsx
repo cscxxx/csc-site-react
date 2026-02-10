@@ -9,8 +9,6 @@ import {
   DashboardOutlined,
   UserOutlined,
   FileTextOutlined,
-  SettingOutlined,
-  ApiOutlined,
   BarChartOutlined,
   InfoCircleOutlined,
   MessageOutlined,
@@ -20,6 +18,11 @@ import {
 export function useSideMenu(): MenuProps['items'] {
   return useMemo<MenuProps['items']>(
     () => [
+      {
+        key: '/home',
+        icon: <FileTextOutlined />,
+        label: '首页',
+      },
       {
         key: '/dashboard',
         icon: <DashboardOutlined />,
@@ -31,19 +34,9 @@ export function useSideMenu(): MenuProps['items'] {
         label: '文章列表',
       },
       {
-        key: '/home',
-        icon: <FileTextOutlined />,
-        label: '首页',
-      },
-      {
         key: '/message',
         icon: <MessageOutlined />,
         label: '留言板',
-      },
-      {
-        key: '/settings',
-        icon: <SettingOutlined />,
-        label: '设置',
       },
       {
         key: '/about',
@@ -59,11 +52,6 @@ export function useSideMenu(): MenuProps['items'] {
         key: '/project',
         icon: <ProjectOutlined />,
         label: '示例项目',
-      },
-      {
-        key: '/mock',
-        icon: <ApiOutlined />,
-        label: 'Mock 数据',
       },
       {
         key: '/performance',

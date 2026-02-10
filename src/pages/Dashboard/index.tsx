@@ -17,7 +17,7 @@ function Dashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="总用户数"
+              title="数"
               value={1128}
               formatter={value => formatNumber(value as number)}
               prefix={<UserOutlined />}
@@ -28,7 +28,7 @@ function Dashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="订单总数"
+              title="数"
               value={9324}
               formatter={value => formatNumber(value as number)}
               prefix={<ShoppingCartOutlined />}
@@ -39,7 +39,7 @@ function Dashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="总收入"
+              title="数"
               value={112893}
               formatter={value => formatCurrency(value as number)}
               prefix={<DollarOutlined />}
@@ -50,7 +50,7 @@ function Dashboard() {
         <Col xs={24} sm={12} lg={6}>
           <Card>
             <Statistic
-              title="增长率"
+              title="数"
               value={9.3}
               formatter={value => formatPercentage(value as number)}
               prefix={<LineChartOutlined />}
