@@ -9,7 +9,13 @@ export interface MessageItem {
   content: string;
   createDate: string;
   avatar: string;
-  blogId: number;
+  blogId: number | null;
+}
+
+/** 发布留言请求参数 */
+export interface PublishMessageParams {
+  nickname: string;
+  content: string;
 }
 
 /** 留言列表查询参数（对应地址栏） */

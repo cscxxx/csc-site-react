@@ -39,7 +39,7 @@ export function useSideMenu(): MenuProps['items'] {
       {
         key: '/message',
         icon: <MessageOutlined />,
-        label: '留言板管理',
+        label: '留言板',
       },
       {
         key: '/settings',

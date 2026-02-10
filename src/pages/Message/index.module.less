@@ -10,6 +10,34 @@
   font-weight: bold;
 }
 
+.mainLayout {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-lg;
+
+  @media (min-width: 992px) {
+    flex-direction: row;
+    align-items: flex-start;
+
+    .listSection {
+      flex: 1;
+      min-width: 0;
+      padding-right: @spacing-lg;
+      border-right: 1px solid rgba(0, 0, 0, 0.06);
+      margin-right: @spacing-lg;
+    }
+
+    .publishSection {
+      flex-shrink: 0;
+      width: 360px;
+    }
+  }
+}
+
+.publishForm {
+  max-width: 100%;
+}
+
 .toolbar {
   margin-bottom: @spacing-md;
   display: flex;
@@ -20,4 +48,78 @@
 
 .searchInput {
   width: 220px;
+}
+
+.messageList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-md;
+}
+
+.messageItem {
+  display: flex;
+  gap: @spacing-md;
+  padding: @spacing-md;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.01);
+}
+
+.messageAvatar {
+  flex-shrink: 0;
+
+  img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.avatarPlaceholder {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.messageBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.messageMeta {
+  display: flex;
+  align-items: center;
+  gap: @spacing-sm;
+  margin-bottom: @spacing-xs;
+}
+
+.nickname {
+  font-weight: 500;
+}
+
+.createDate {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.messageContent {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.expandBtn {
+  padding-left: 6px;
+  vertical-align: baseline;
+}
+
+.paginationWrap {
+  margin-top: @spacing-md;
+  display: flex;
+  justify-content: flex-start;
 }

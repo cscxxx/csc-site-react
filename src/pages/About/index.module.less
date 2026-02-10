@@ -1,26 +1,16 @@
 @import '@/styles/variables.less';
 
-.pageContainer {
-  padding: @spacing-md;
-}
+/* 略大于布局的 margin+padding，使内容区不出现滚动条，仅 iframe 内滚动 */
+@about-content-gap: 56px;
 
-.pageTitle {
-  margin-bottom: @spacing-md;
-  font-size: @font-size-xl;
-  font-weight: bold;
-}
-
-.aboutCard {
-  margin-bottom: @spacing-md;
-}
-
-.urlDisplay {
-  padding: @spacing-sm 0;
-  color: @text-color;
-  font-size: @font-size-md;
-  word-break: break-all;
-}
-
-.urlInput {
+.wrap {
   width: 100%;
+}
+
+.iframe {
+  display: block;
+  width: 100%;
+  height: calc(100vh - @about-content-gap);
+  min-height: 400px;
+  border: 0;
 }

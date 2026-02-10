@@ -1,11 +1,11 @@
 /**
  * 留言板服务
- * GET /api/message 分页查询，DELETE /api/message/:id 删除（需 token）
+ * GET /api/message 分页查询，POST /api/message 发布留言
  */
 
 import request from '@/utils/request';
 import type { ApiResponse } from '@/types';
-import type { MessageListParams, MessageListData } from './types';
+import type { MessageItem, MessageListParams, MessageListData, PublishMessageParams } from './types';
 
 /**
  * 获取留言列表
@@ -35,16 +35,19 @@ export async function getMessageList(
 }
 
 /**
- * 删除一条留言（需 token）
- * @param id 留言 id
+ * 发布留言
+ * @param params nickname、content
  */
-export async function deleteMessage(id: number): Promise<boolean> {
-  const { promise } = request.delete<ApiResponse<boolean>>(`/api/message/${id}`);
+export async function publishMessage(params: PublishMessageParams): Promise<MessageItem> {
+  const { promise } = request.post<ApiResponse<MessageItem>>('/api/message', params);
   const res = await promise;
   const body = res.data;
 
   if (body.code !== 0) {
-    throw new Error(body.msg || '删除失败');
+    throw new Error(body.msg || '发布失败');
   }
-  return body.data === true;
+  if (body.data == null) {
+    throw new Error(body.msg || '发布失败');
+  }
+  return body.data;
 }
