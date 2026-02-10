@@ -37,15 +37,12 @@ export default defineConfig({
             (/node_modules[/\\]react[/\\]/.test(id) && !/node_modules[/\\]react-/.test(id));
           if (isReact) return 'vendor-react';
           if (id.includes('antd') || id.includes('@ant-design')) return 'vendor-antd';
-          if (id.includes('@mdxeditor')) return undefined;
           // 重要依赖按包名单独拆 chunk，便于缓存与排查体积
           if (id.includes('node_modules/ahooks/')) return 'vendor-ahooks';
           if (id.includes('node_modules/gsap/')) return 'vendor-gsap';
           if (id.includes('node_modules/dayjs/')) return 'vendor-dayjs';
-          if (id.includes('node_modules/marked/')) return 'vendor-marked';
           if (id.includes('node_modules/mockjs/')) return 'vendor-mockjs';
           if (id.includes('node_modules/numeral/')) return 'vendor-numeral';
-          if (id.includes('node_modules/turndown/')) return 'vendor-turndown';
           if (id.includes('node_modules/web-vitals/')) return 'vendor-web-vitals';
           if (id.includes('node_modules/zustand/')) return 'vendor-zustand';
           return 'vendor';

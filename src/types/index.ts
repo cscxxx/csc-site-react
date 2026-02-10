@@ -4,7 +4,7 @@
  *
  * @example
  * ```ts
- * import type { ApiResponse, UserInfo, LoginParams } from '@/types';
+ * import type { ApiResponse, UserInfo } from '@/types';
  * ```
  */
 
@@ -12,7 +12,7 @@
 export type { ApiResponse, PaginationParams, PaginatedData, PaginatedResponse } from './api';
 
 // 用户相关类型
-export type { UserInfo, LoginParams, LoginResponseData, LoginResponse, UserListItem } from './user';
+export type { UserInfo, UserListItem } from './user';
 
 // 请求工具相关类型
 export type {

@@ -1,6 +1,6 @@
 /**
  * 通用图片上传组件
- * 单文件、最大 2MB、POST /api/upload、请求头 Authorization 传 token
+ * 单文件、最大 2MB、POST /api/upload，使用项目 request
  */
 
 export { ImageUpload } from './ImageUpload';

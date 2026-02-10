@@ -1,6 +1,6 @@
 /**
  * 通用图片上传组件
- * 单文件上传，最大 2MB，请求头携带 token
+ * 单文件上传，最大 2MB，使用项目 request 发起请求
  */
 
 import { useCallback } from 'react';

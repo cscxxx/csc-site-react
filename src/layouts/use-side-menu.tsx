@@ -15,7 +15,6 @@ import {
   InfoCircleOutlined,
   MessageOutlined,
   ProjectOutlined,
-  LogoutOutlined,
 } from '@ant-design/icons';
 
 export function useSideMenu(): MenuProps['items'] {
@@ -70,20 +69,6 @@ export function useSideMenu(): MenuProps['items'] {
         key: '/performance',
         icon: <BarChartOutlined />,
         label: '性能监控',
-      },
-      {
-        type: 'divider',
-      },
-      {
-        key: '/admin',
-        icon: <UserOutlined />,
-        label: '个人中心',
-      },
-      {
-        key: 'logout',
-        icon: <LogoutOutlined />,
-        label: '退出登录',
-        danger: true,
       },
     ],
     []

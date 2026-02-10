@@ -1,6 +1,7 @@
 # 依赖和构建产物
 node_modules/
 dist/
+csc-site-react/
 build/
 .tmp/
 *.tsbuildinfo

@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Layout, Menu, theme, Button } from 'antd';
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useAuthStore, useSettingStore } from '@/store';
+import { useSettingStore } from '@/store';
 import { useTitleAnimation } from './use-anime';
 import { useSideMenu } from './use-side-menu.tsx';
 import styles from './index.module.less';
@@ -12,8 +12,6 @@ const { Sider, Content } = Layout;
 function AppLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const logout = useAuthStore(state => state.logout);
-  const clearSetting = useSettingStore(state => state.clearSetting);
   const setting = useSettingStore(state => state.setting);
   const { token } = theme.useToken();
 
@@ -32,21 +30,9 @@ function AppLayout() {
   const menuItems = useSideMenu();
 
   const handleMenuClick = ({ key }: { key: string }) => {
-    // 处理退出登录
-    if (key === 'logout') {
-      handleLogout();
-      return;
-    }
-    // 仅对带路径的菜单项导航
     if (key.startsWith('/')) {
       navigate(key);
     }
-  };
-
-  const handleLogout = () => {
-    logout();
-    clearSetting();
-    navigate('/login', { replace: true });
   };
 
   const selectedKeys = [location.pathname];

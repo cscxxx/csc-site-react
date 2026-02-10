@@ -12,7 +12,7 @@ function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const imageRefs = useRef<Map<number, HTMLImageElement>>(new Map());
-  const layoutTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const layoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // 加载 Banner 列表

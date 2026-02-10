@@ -1,19 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Table, Button, App } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import { getProjectList, addProject, updateProject, deleteProject } from './service';
-import { useProjectColumns } from './use-columns';
-import ProjectEditModal from './useEditModal';
-import type { ProjectItem, ProjectSubmitFormData } from './types';
-import styles from './index.module.less';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { App, Card, Empty, Image, Spin } from 'antd';
+import { GithubOutlined, LinkOutlined } from '@ant-design/icons';
+import { getProjectList } from './service';
+import type { ProjectItem } from './types';
+
+function parseDescription(description: ProjectItem['description']): string[] {
+  if (Array.isArray(description)) return description;
+  if (typeof description === 'string') {
+    try {
+      const parsed = JSON.parse(description) as unknown;
+      return Array.isArray(parsed) ? (parsed as string[]) : [description];
+    } catch {
+      return [description];
+    }
+  }
+  return [];
+}
+
+function getTargetUrl(item: ProjectItem): string {
+  if (item.url) return item.url;
+  if (item.github) return item.github;
+  return '';
+}
 
 function Project() {
-  const { message, modal } = App.useApp();
+  const { message } = App.useApp();
   const [list, setList] = useState<ProjectItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ProjectItem | null>(null);
-  const [submitting, setSubmitting] = useState(false);
 
   const loadList = useCallback(async () => {
     try {
@@ -31,85 +44,110 @@ function Project() {
     loadList();
   }, [loadList]);
 
-  const handleAdd = () => {
-    setEditingItem(null);
-    setModalOpen(true);
-  };
+  const sortedList = useMemo(() => {
+    return [...list].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  }, [list]);
 
-  const handleEdit = (record: ProjectItem) => {
-    setEditingItem(record);
-    setModalOpen(true);
+  const openProject = (item: ProjectItem) => {
+    const targetUrl = getTargetUrl(item);
+    if (!targetUrl) return;
+    window.open(targetUrl, '_blank', 'noopener,noreferrer');
   };
-
-  const handleCancel = () => {
-    setModalOpen(false);
-    setEditingItem(null);
-  };
-
-  const handleSubmit = async (values: ProjectSubmitFormData) => {
-    try {
-      setSubmitting(true);
-      if (editingItem) {
-        await updateProject(editingItem.id, values);
-        message.success('修改成功');
-      } else {
-        await addProject(values);
-        message.success('新增成功');
-      }
-      handleCancel();
-      await loadList();
-    } catch (err) {
-      message.error(err instanceof Error ? err.message : '操作失败');
-      throw err;
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleDelete = (record: ProjectItem) => {
-    modal.confirm({
-      title: '确认删除',
-      content: `确定要删除项目「${record.name}」吗？`,
-      okText: '确认',
-      cancelText: '取消',
-      okType: 'danger',
-      onOk: async () => {
-        try {
-          await deleteProject(record.id);
-          message.success('删除成功');
-          await loadList();
-        } catch (err) {
-          message.error(err instanceof Error ? err.message : '删除失败');
-          throw err;
-        }
-      },
-    });
-  };
-
-  const columns = useProjectColumns({ onEdit: handleEdit, onDelete: handleDelete });
 
   return (
-    <div className={styles.pageContainer}>
-      <h1 className={styles.pageTitle}>示例项目</h1>
-      <div className={styles.toolbar}>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-          新增
-        </Button>
-      </div>
-      <Table<ProjectItem>
-        columns={columns}
-        dataSource={list}
-        rowKey="id"
-        loading={loading}
-        scroll={{ x: 1000 }}
-      />
-      <ProjectEditModal
-        open={modalOpen}
-        editingItem={editingItem}
-        submitting={submitting}
-        onCancel={handleCancel}
-        onSubmit={handleSubmit}
-      />
+    <div className="p-4">
+      <h1 className="mb-3 text-xl font-bold">示例项目</h1>
+
+      {loading ? (
+        <div className="flex w-full justify-center py-10">
+          <Spin />
+        </div>
+      ) : sortedList.length === 0 ? (
+        <Empty description="暂无项目" />
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {sortedList.map(item => {
+            const descList = parseDescription(item.description);
+            const targetUrl = getTargetUrl(item);
+            const disabled = !targetUrl;
+
+            return (
+              <Card
+                key={item.id}
+                hoverable={!disabled}
+                className={disabled ? 'opacity-60' : ''}
+                size="small"
+                styles={{ body: { padding: 20 } }}
+                onClick={() => openProject(item)}
+                onKeyDown={e => {
+                  if (disabled) return;
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openProject(item);
+                  }
+                }}
+                tabIndex={disabled ? -1 : 0}
+                role="button"
+                aria-disabled={disabled}
+              >
+                <div className="flex min-w-0 items-center gap-3">
+                  {item.thumb ? (
+                    <Image
+                      src={item.thumb}
+                      alt={item.name}
+                      preview={false}
+                      width={64}
+                      height={72}
+                      style={{ objectFit: 'cover', borderRadius: 6 }}
+                    />
+                  ) : (
+                    <div className="h-[72px] w-16 shrink-0 rounded-md bg-neutral-100" />
+                  )}
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex min-w-0 items-center justify-between gap-2">
+                      <div className="truncate text-sm font-medium">{item.name}</div>
+                      <div className="shrink-0 text-xs text-neutral-400">#{item.id}</div>
+                    </div>
+                    <div className="mt-0.5 truncate text-xs text-neutral-600">
+                      {descList.length ? descList.join('；') : '暂无描述'}
+                    </div>
+                  </div>
+
+                  <div className="shrink-0">
+                    <div className="flex flex-col items-end gap-1 text-xs">
+                      {item.url ? (
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-blue-600 hover:underline"
+                        >
+                          <LinkOutlined />
+                          访问
+                        </a>
+                      ) : null}
+                      {item.github ? (
+                        <a
+                          href={item.github}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="inline-flex items-center gap-1 text-neutral-700 hover:underline"
+                        >
+                          <GithubOutlined />
+                          GitHub
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

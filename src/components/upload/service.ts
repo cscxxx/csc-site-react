@@ -1,6 +1,6 @@
 /**
  * 图片上传服务
- * 调用 /api/upload 接口，请求头由全局拦截器自动添加 Authorization: Bearer <token>
+ * 调用 /api/upload 接口，使用项目 request 发起请求
  */
 
 import type { ApiResponse } from '@/types';
