@@ -27,7 +27,13 @@ export type {
 export type { ErrorType, ErrorInfo, ErrorReportConfig } from './error';
 
 // 性能监控相关类型
-export type { MetricRating, VitalMetric, PerformanceRecord, MetricThreshold } from './performance';
+export type {
+  MetricRating,
+  MetricThreshold,
+  PerfReportPayload,
+  PerfRecord,
+  PerfListData,
+} from './performance';
 
 // 通用类型
 export type { MenuItem, TableColumn, OptionItem, KeyValuePair } from './common';

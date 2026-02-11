@@ -1,218 +1,133 @@
-import { useEffect } from 'react';
-import { Card, Row, Col, Statistic, Tag, Button, Space, Table, App, Descriptions } from 'antd';
-import { ReloadOutlined, DeleteOutlined } from '@ant-design/icons';
-import type { ColumnsType } from 'antd/es/table';
-import { usePerformanceStore } from '@/store';
-import {
-  initWebVitals,
-  getCurrentMetrics,
-  clearPerformanceHistory,
-} from '@/utils/performance/vitals';
-import type { PerformanceRecord } from '@/types';
-import { COLORS } from '@/styles/constants';
-import { useMetricInfo } from './use-metric-info.ts';
-import styles from './index.module.less';
+import { useState, useCallback } from 'react';
+import { Card, Button, Space, Table, Form, Input, DatePicker } from 'antd';
+import { ReloadOutlined, SearchOutlined } from '@ant-design/icons';
+import { useRequest } from 'ahooks';
 import dayjs from 'dayjs';
+import { getPerfList } from './service';
+import type { PerfListParams } from './service';
+import type { PerfRecord } from '@/types';
+import { useColumns } from './use-columns.tsx';
+import styles from './index.module.less';
+
+const DEFAULT_PAGE_SIZE = 20;
+const DATE_FORMAT = 'YYYY-MM-DD';
+const TIME_FORMAT = 'HH:mm';
+const DATETIME_FORMAT = `${DATE_FORMAT} ${TIME_FORMAT}`;
+
+/** 查询表单值 */
+interface PerfFilterForm {
+  dateRange?: [dayjs.Dayjs, dayjs.Dayjs] | null;
+  visitorId?: string;
+  pageUrl?: string;
+  ip?: string;
+}
 
 function Performance() {
-  const { message } = App.useApp();
-  const { currentMetrics, history, updateMetrics, refreshHistory, clearHistory } =
-    usePerformanceStore();
-  const { metricInfo: METRIC_INFO, getRatingColor, getRatingText, formatMetricValue } =
-    useMetricInfo();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [form] = Form.useForm<PerfFilterForm>();
+  /** 当前生效的查询条件（用于请求与 refreshDeps） */
+  const [filters, setFilters] = useState<Omit<PerfListParams, 'page' | 'limit'>>({});
+  const columns = useColumns();
 
-  // 刷新当前指标
-  const handleRefresh = () => {
-    const metrics = getCurrentMetrics();
-    updateMetrics(metrics);
-    refreshHistory();
-    message.success('性能数据已刷新');
-  };
+  const buildParams = useCallback((): PerfListParams => {
+    const base = { page, limit: pageSize };
+    if (Object.keys(filters).length === 0) return base;
+    return { ...base, ...filters };
+  }, [page, pageSize, filters]);
 
-  // 清除历史记录
-  const handleClearHistory = () => {
-    clearPerformanceHistory();
-    clearHistory();
-    message.success('历史记录已清除');
-  };
+  const {
+    data: listData,
+    loading,
+    run: runFetchList,
+  } = useRequest(() => getPerfList(buildParams()), { refreshDeps: [buildParams] });
 
-  // 初始化性能监控（如果当前没有指标）
-  useEffect(() => {
-    // 页面挂载时刷新历史记录
-    refreshHistory();
-
-    if (Object.keys(currentMetrics).length === 0) {
-      initWebVitals(metrics => {
-        updateMetrics(metrics);
-        // 指标更新后刷新历史记录
-        refreshHistory();
-      });
+  const onSearch = useCallback(() => {
+    const values = form.getFieldsValue() as PerfFilterForm;
+    const next: Omit<PerfListParams, 'page' | 'limit'> = {};
+    if (values.dateRange?.length === 2) {
+      next.startDate = values.dateRange[0].format(DATE_FORMAT);
+      next.startTime = values.dateRange[0].format(TIME_FORMAT);
+      next.endDate = values.dateRange[1].format(DATE_FORMAT);
+      next.endTime = values.dateRange[1].format(TIME_FORMAT);
     }
-  }, [currentMetrics, updateMetrics, refreshHistory]);
+    if (values.visitorId?.trim()) next.visitorId = values.visitorId.trim();
+    if (values.pageUrl?.trim()) next.pageUrl = values.pageUrl.trim();
+    if (values.ip?.trim()) next.ip = values.ip.trim();
+    setFilters(next);
+    setPage(1);
+  }, [form]);
 
-  // 历史记录表格列定义
-  const historyColumns: ColumnsType<PerformanceRecord> = [
-    {
-      title: '时间',
-      dataIndex: 'timestamp',
-      key: 'timestamp',
-      width: 180,
-      render: (timestamp: number) => dayjs(timestamp).format('YYYY-MM-DD HH:mm:ss'),
-    },
-    {
-      title: 'LCP',
-      key: 'lcp',
-      width: 120,
-      render: (_, record) => {
-        const metric = record.metrics.LCP;
-        if (!metric) return '-';
-        return (
-          <Space>
-            <span>{formatMetricValue('LCP', metric.value)}</span>
-            <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'INP',
-      key: 'inp',
-      width: 120,
-      render: (_, record) => {
-        const metric = record.metrics.INP;
-        if (!metric) return '-';
-        return (
-          <Space>
-            <span>{formatMetricValue('INP', metric.value)}</span>
-            <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'CLS',
-      key: 'cls',
-      width: 120,
-      render: (_, record) => {
-        const metric = record.metrics.CLS;
-        if (!metric) return '-';
-        return (
-          <Space>
-            <span>{formatMetricValue('CLS', metric.value)}</span>
-            <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'FCP',
-      key: 'fcp',
-      width: 120,
-      render: (_, record) => {
-        const metric = record.metrics.FCP;
-        if (!metric) return '-';
-        return (
-          <Space>
-            <span>{formatMetricValue('FCP', metric.value)}</span>
-            <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-          </Space>
-        );
-      },
-    },
-    {
-      title: 'TTFB',
-      key: 'ttfb',
-      width: 120,
-      render: (_, record) => {
-        const metric = record.metrics.TTFB;
-        if (!metric) return '-';
-        return (
-          <Space>
-            <span>{formatMetricValue('TTFB', metric.value)}</span>
-            <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-          </Space>
-        );
-      },
-    },
-  ];
+  const onReset = useCallback(() => {
+    form.resetFields();
+    setFilters({});
+    setPage(1);
+  }, [form]);
 
-  // 获取当前指标卡片数据
-  const getMetricCards = () => {
-    const metrics = ['LCP', 'INP', 'CLS', 'FCP', 'TTFB'] as const;
-    return metrics.map(name => {
-      const metric = currentMetrics[name];
-      const info = METRIC_INFO[name];
-      const hasMetric = !!metric;
-
-      return (
-        <Col xs={24} sm={12} lg={8} key={name}>
-          <Card>
-            <Statistic
-              title={
-                <Space>
-                  <span>{info.label}</span>
-                  {hasMetric && (
-                    <Tag color={getRatingColor(metric.rating)}>{getRatingText(metric.rating)}</Tag>
-                  )}
-                </Space>
-              }
-              value={hasMetric ? formatMetricValue(name, metric.value) : '-'}
-              styles={{
-                content: {
-                  color: hasMetric ? getRatingColor(metric.rating) : COLORS.primary,
-                },
-              }}
-            />
-            <Descriptions
-              size="small"
-              column={1}
-              style={{ marginTop: 16 }}
-              items={[
-                {
-                  label: '说明',
-                  children: info.description,
-                },
-                ...(hasMetric
-                  ? [
-                      {
-                        label: '阈值',
-                        children: `好: ≤${formatMetricValue(name, info.thresholds.good)}, 差: >${formatMetricValue(name, info.thresholds.poor)}`,
-                      },
-                    ]
-                  : []),
-              ]}
-            />
-          </Card>
-        </Col>
-      );
-    });
-  };
+  const rows = listData?.rows ?? [];
+  const total = listData?.total ?? 0;
 
   return (
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <h1 className={styles.pageTitle}>性能监控</h1>
         <Space>
-          <Button icon={<ReloadOutlined />} onClick={handleRefresh}>
-            刷新数据
-          </Button>
-          <Button icon={<DeleteOutlined />} danger onClick={handleClearHistory}>
-            清除历史
+          <Button icon={<ReloadOutlined />} onClick={() => runFetchList()} loading={loading}>
+            刷新列表
           </Button>
         </Space>
       </div>
 
-      <Card title="Core Web Vitals" style={{ marginBottom: 16 }}>
-        <Row gutter={[16, 16]}>{getMetricCards()}</Row>
+      <Card title="查询条件" size="small" className={styles.filterCard}>
+        <Form form={form} layout="inline" onFinish={onSearch} style={{ flexWrap: 'wrap', gap: 8 }}>
+          <Form.Item name="dateRange" label="日期时间范围">
+            <DatePicker.RangePicker
+              allowClear
+              showTime={{ format: TIME_FORMAT }}
+              format={DATETIME_FORMAT}
+              style={{ width: 360 }}
+            />
+          </Form.Item>
+          <Form.Item name="visitorId" label="访客 ID">
+            <Input placeholder="模糊匹配" allowClear style={{ width: 160 }} />
+          </Form.Item>
+          <Form.Item name="pageUrl" label="页面 URL">
+            <Input placeholder="模糊匹配" allowClear style={{ width: 200 }} />
+          </Form.Item>
+          <Form.Item name="ip" label="IP">
+            <Input placeholder="模糊匹配" allowClear style={{ width: 140 }} />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit" icon={<SearchOutlined />}>
+                查询
+              </Button>
+              <Button onClick={onReset}>重置</Button>
+            </Space>
+          </Form.Item>
+        </Form>
       </Card>
 
-      <Card title="历史记录">
-        <Table
-          columns={historyColumns}
-          dataSource={history}
+      <Card title="上报记录">
+        <Table<PerfRecord>
+          size="small"
+          columns={columns}
+          dataSource={rows}
           rowKey="id"
-          pagination={{ pageSize: 10 }}
-          locale={{ emptyText: '暂无历史记录' }}
+          loading={loading}
+          pagination={{
+            current: page,
+            pageSize,
+            total,
+            showSizeChanger: true,
+            showTotal: t => `共 ${t} 条`,
+            onChange: (p, size) => {
+              setPage(p);
+              setPageSize(size ?? DEFAULT_PAGE_SIZE);
+            },
+          }}
+          locale={{ emptyText: '暂无上报记录' }}
+          scroll={{ x: 1400 }}
         />
       </Card>
     </div>

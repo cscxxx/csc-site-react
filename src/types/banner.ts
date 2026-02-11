@@ -16,6 +16,8 @@ export interface BannerItem {
   title: string;
   /** 描述 */
   description: string;
+  /** 排序（数字越小越靠前），接口返回可能无此字段时兼容为 undefined */
+  order?: number;
 }
 
 /**
@@ -30,6 +32,8 @@ export interface BannerSubmitItem {
   title: string;
   /** 描述 */
   description: string;
+  /** 排序（数字越小越靠前），新增和修改时传入 */
+  order: number;
 }
 
 /**

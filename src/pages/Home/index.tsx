@@ -15,12 +15,13 @@ function Home() {
   const layoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // 加载 Banner 列表
+  // 加载 Banner 列表（按 order 排序，order 越小越靠前）
   const loadBannerList = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getBannerList();
-      setBannerList(data);
+      const sorted = [...data].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      setBannerList(sorted);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : '获取 Banner 列表失败';
       message.error(errorMessage);

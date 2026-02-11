@@ -9,37 +9,6 @@
 export type MetricRating = 'good' | 'needs-improvement' | 'poor';
 
 /**
- * Web Vitals 指标
- */
-export interface VitalMetric {
-  /** 指标名称（LCP、INP、CLS、FCP、TTFB） */
-  name: string;
-  /** 指标值 */
-  value: number;
-  /** 指标评级 */
-  rating: MetricRating;
-  /** 指标增量 */
-  delta: number;
-  /** 指标 ID */
-  id: string;
-  /** 时间戳 */
-  timestamp: number;
-}
-
-/**
- * 性能记录
- * 包含一次性能采集的所有指标
- */
-export interface PerformanceRecord {
-  /** 记录唯一 ID */
-  id: string;
-  /** 记录时间戳 */
-  timestamp: number;
-  /** 指标数据 */
-  metrics: Record<string, VitalMetric>;
-}
-
-/**
  * 指标阈值配置
  */
 export interface MetricThreshold {
@@ -47,4 +16,60 @@ export interface MetricThreshold {
   good: number;
   /** 较差阈值 */
   poor: number;
+}
+
+/**
+ * 性能数据上报请求体（与后端 page_performance 字段对齐）
+ */
+export interface PerfReportPayload {
+  pageUrl: string;
+  visitorId?: string;
+  lcp?: number;
+  fid?: number;
+  cls?: number;
+  fcp?: number;
+  ttfb?: number;
+  navigationType?: string;
+  duration?: number;
+  viewportWidth?: number;
+  viewportHeight?: number;
+  screenWidth?: number;
+  screenHeight?: number;
+  browser?: string;
+  os?: string;
+  device?: string;
+}
+
+/**
+ * 服务端单条性能记录（GET /api/perf 返回的 data.rows 元素）
+ */
+export interface PerfRecord {
+  id: number;
+  pageUrl: string;
+  visitorId: string | null;
+  ip: string | null;
+  userAgent: string | null;
+  browser: string | null;
+  os: string | null;
+  device: string | null;
+  lcp: number | null;
+  fid: number | null;
+  cls: number | null;
+  fcp: number | null;
+  ttfb: number | null;
+  navigationType: string | null;
+  duration: number | null;
+  viewportWidth: number | null;
+  viewportHeight: number | null;
+  screenWidth: number | null;
+  screenHeight: number | null;
+  createDate: string;
+}
+
+/**
+ * 性能列表接口返回的 data 结构
+ */
+export interface PerfListData {
+  total: number;
+  rows: PerfRecord[];
 }
