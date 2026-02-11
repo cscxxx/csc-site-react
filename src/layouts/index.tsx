@@ -16,16 +16,32 @@ function AppLayout() {
   const setting = useSettingStore(state => state.setting);
   const setSetting = useSettingStore(state => state.setSetting);
 
-  // 初次访问时拉取设置并写入 store
+  // 每次页面加载时拉取设置并写入 store
   const { run: fetchSetting } = useRequest(getSetting, {
     manual: true,
-    onSuccess: data => setSetting(data),
+    onSuccess: data => {
+      setSetting(data);
+      // 设置 favicon
+      if (data.favicon) {
+        const link = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+        if (link) {
+          link.href = data.favicon;
+        } else {
+          const newLink = document.createElement('link');
+          newLink.rel = 'icon';
+          newLink.href = data.favicon;
+          document.head.appendChild(newLink);
+        }
+      }
+    },
+    onError: err => {
+      console.error('获取设置失败:', err);
+    },
   });
   useEffect(() => {
-    if (!setting) {
-      fetchSetting();
-    }
-  }, [setting, fetchSetting]);
+    // 每次组件挂载或页面重新加载时都重新获取设置
+    fetchSetting();
+  }, [fetchSetting]);
 
   const menuItems = useSideMenu();
 
@@ -105,7 +121,7 @@ function AppLayout() {
                         rel="noopener noreferrer"
                         className={styles.settingContactLink}
                       >
-                        GitHub
+                        {setting.githubName || 'GitHub'}
                       </a>
                     ) : null}
                     {setting.mail ? (
