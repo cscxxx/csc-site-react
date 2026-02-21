@@ -17,8 +17,9 @@
 
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import AppLayout from '@/layouts';
 import LazyRoute, { LoadingFallback } from '@/components/LazyRoute';
+
+const AppLayout = lazy(() => import('@/layouts'));
 
 // 路由懒加载：使用 React.lazy 动态导入页面组件
 const Dashboard = lazy(() => import('@/pages/Dashboard'));
@@ -36,7 +37,11 @@ export const router = createBrowserRouter([
   // 主布局路由：所有页面均在 AppLayout 下
   {
     path: '/',
-    element: <AppLayout />,
+    element: (
+      <Suspense fallback={<LoadingFallback />}>
+        <AppLayout />
+      </Suspense>
+    ),
     children: [
       {
         path: 'home',

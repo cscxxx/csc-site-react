@@ -1,3 +1,7 @@
+/**
+ * Numeral 由本模块按需引入，不在 main 中加载；
+ * 使用到本工具的首个懒加载页面（如 Dashboard、Performance）加载时会一并拉取 numeral chunk。
+ */
 import numeral from '../config/numeral';
 
 /**

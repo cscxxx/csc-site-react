@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { App, Spin } from 'antd';
+import { App, Image, Spin } from 'antd';
 import { getBannerList } from './service';
 import type { BannerItem } from '@/types';
 import styles from './index.module.less';
@@ -8,12 +8,13 @@ function Home() {
   const { message } = App.useApp();
   const [bannerList, setBannerList] = useState<BannerItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [inViewportIds, setInViewportIds] = useState<Set<number>>(new Set());
   const [loadedImages, setLoadedImages] = useState<Set<number>>(new Set());
   const containerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<Map<number, HTMLDivElement>>(new Map());
-  const imageRefs = useRef<Map<number, HTMLImageElement>>(new Map());
   const layoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
+  const resizeDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastLayoutWidthRef = useRef<number>(0);
 
   // 加载 Banner 列表（按 order 排序，order 越小越靠前）
   const loadBannerList = useCallback(async () => {
@@ -31,13 +32,19 @@ function Home() {
     }
   }, [message]);
 
-  // 瀑布流布局计算
+  // 瀑布流布局计算（仅当容器宽度有效且与上次差异较大时重算，减少闪动）
   const layoutMasonry = useCallback(() => {
     if (!containerRef.current || bannerList.length === 0) return;
 
     const container = containerRef.current;
+    const containerWidth = container.offsetWidth;
+    if (containerWidth <= 0) return;
+    // 宽度与上次相同或差异小于 2px 时跳过，避免 ResizeObserver 重复触发导致闪动
+    if (Math.abs(containerWidth - lastLayoutWidthRef.current) < 2) return;
+    lastLayoutWidthRef.current = containerWidth;
+
     const gap = 24; // 间距
-    const columnCount = getColumnCount();
+    const columnCount = getColumnCount(containerWidth);
     const columns: number[] = new Array(columnCount).fill(0);
 
     // 先设置所有元素的位置和宽度
@@ -66,10 +73,10 @@ function Home() {
     }
   }, [bannerList]);
 
-  // 获取列数
-  const getColumnCount = () => {
+  // 获取列数（基于容器宽度，避免侧栏折叠/展开时布局错位）
+  const getColumnCount = (containerWidth?: number) => {
     if (typeof window === 'undefined') return 4;
-    const width = window.innerWidth;
+    const width = containerWidth ?? containerRef.current?.offsetWidth ?? window.innerWidth;
     if (width < 576) return 1; // xs
     if (width < 768) return 2; // sm
     if (width < 1200) return 3; // md-lg
@@ -93,61 +100,70 @@ function Home() {
     }, 100);
   }, [layoutMasonry]);
 
-  // 初始化 Intersection Observer 用于懒加载
+  // 视口内懒加载：观察瀑布流卡片容器，进入视口后将 id 加入 inViewportIds，Image 再请求图片
   useEffect(() => {
     if (bannerList.length === 0) return;
 
-    // 创建 observer（只创建一次）
-    if (!observerRef.current) {
-      observerRef.current = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              const img = entry.target as HTMLImageElement;
-              const id = parseInt(img.dataset.id || '0', 10);
-              
-              if (!loadedImages.has(id) && img.dataset.src) {
-                img.src = img.dataset.src;
-                img.removeAttribute('data-src');
-              }
-            }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          const id = parseInt(el.getAttribute('data-banner-id') ?? '0', 10);
+          setInViewportIds((prev) => {
+            if (prev.has(id)) return prev;
+            return new Set(prev).add(id);
           });
-        },
-        {
-          rootMargin: '50px', // 提前 50px 开始加载
-        }
-      );
-    }
+          observer.unobserve(el);
+        });
+      },
+      { rootMargin: '100px', threshold: 0.01 }
+    );
 
-    // 观察所有未加载的图片
     const timer = setTimeout(() => {
-      imageRefs.current.forEach((img) => {
-        if (img && observerRef.current && img.dataset.src && !loadedImages.has(parseInt(img.dataset.id || '0', 10))) {
-          observerRef.current.observe(img);
-        }
+      bannerList.forEach((banner) => {
+        const itemEl = itemRefs.current.get(banner.id);
+        if (itemEl) observer.observe(itemEl);
       });
-    }, 150);
+    }, 0);
 
     return () => {
       clearTimeout(timer);
+      observer.disconnect();
     };
-  }, [bannerList, loadedImages]);
+  }, [bannerList]);
 
   // 组件挂载时加载数据
   useEffect(() => {
     loadBannerList();
   }, [loadBannerList]);
 
-  // 窗口大小改变时重新布局
+  // 容器尺寸变化时重新布局（防抖 + 宽度变化阈值，减少侧栏折叠/展开时的闪动）
   useEffect(() => {
-    if (bannerList.length === 0) return;
-    
-    const handleResize = () => {
-      layoutMasonry();
+    if (bannerList.length === 0 || !containerRef.current) return;
+
+    const container = containerRef.current;
+    const RESIZE_DEBOUNCE_MS = 120;
+
+    const scheduleLayout = () => {
+      if (resizeDebounceRef.current) clearTimeout(resizeDebounceRef.current);
+      resizeDebounceRef.current = setTimeout(() => {
+        resizeDebounceRef.current = null;
+        layoutMasonry();
+      }, RESIZE_DEBOUNCE_MS);
     };
 
+    const observer = new ResizeObserver(scheduleLayout);
+    observer.observe(container);
+
+    const handleResize = () => scheduleLayout();
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    return () => {
+      if (resizeDebounceRef.current) clearTimeout(resizeDebounceRef.current);
+      observer.disconnect();
+      window.removeEventListener('resize', handleResize);
+    };
   }, [bannerList, layoutMasonry]);
 
   // 数据加载完成后布局
@@ -174,61 +190,53 @@ function Home() {
 
   return (
     <div className={styles.pageContainer}>
-      <div ref={containerRef} className={styles.masonryContainer}>
-        {bannerList.map((banner) => {
-          const isLoaded = loadedImages.has(banner.id);
-          return (
-            <div
-              key={banner.id}
-              ref={(el) => {
-                if (el) {
-                  itemRefs.current.set(banner.id, el);
-                } else {
-                  itemRefs.current.delete(banner.id);
-                }
-              }}
-              className={styles.masonryItem}
-            >
-              <div className={styles.imageWrapper}>
-                {!isLoaded && (
-                  <div className={styles.imagePlaceholder}>
-                    <Spin size="small" />
-                  </div>
-                )}
-                <img
-                  ref={(el) => {
-                    if (el) {
-                      imageRefs.current.set(banner.id, el);
-                      // 如果 observer 已创建，立即观察
-                      if (observerRef.current && el.dataset.src && !isLoaded) {
-                        observerRef.current.observe(el);
-                      }
-                    } else {
-                      const img = imageRefs.current.get(banner.id);
-                      if (img && observerRef.current) {
-                        observerRef.current.unobserve(img);
-                      }
-                      imageRefs.current.delete(banner.id);
-                    }
-                  }}
-                  data-id={banner.id}
-                  data-src={banner.bigImg}
-                  alt={banner.title}
-                  className={`${styles.bannerImage} ${isLoaded ? styles.loaded : ''}`}
-                  onLoad={() => handleImageLoad(banner.id)}
-                  onError={() => handleImageLoad(banner.id)}
-                />
-                <div className={styles.textOverlay}>
-                  <div className={styles.overlayContent}>
-                    <h3 className={styles.cardTitle}>{banner.title}</h3>
-                    <p className={styles.cardDescription}>{banner.description}</p>
+      <Image.PreviewGroup>
+        <div ref={containerRef} className={styles.masonryContainer}>
+          {bannerList.map((banner) => {
+            const inViewport = inViewportIds.has(banner.id);
+            const isLoaded = loadedImages.has(banner.id);
+            return (
+              <div
+                key={banner.id}
+                ref={(el) => {
+                  if (el) {
+                    itemRefs.current.set(banner.id, el);
+                  } else {
+                    itemRefs.current.delete(banner.id);
+                  }
+                }}
+                data-banner-id={banner.id}
+                className={styles.masonryItem}
+              >
+                <div className={styles.imageWrapper}>
+                  {!inViewport && (
+                    <div className={styles.imagePlaceholder}>
+                      <Spin size="small" />
+                    </div>
+                  )}
+                  {inViewport && (
+                    <Image
+                      src={banner.bigImg}
+                      alt={banner.title}
+                      rootClassName={styles.bannerImageWrap}
+                      className={`${styles.bannerImage} ${isLoaded ? styles.loaded : ''}`}
+                      preview={{ mask: '点击查看' }}
+                      onLoad={() => handleImageLoad(banner.id)}
+                      onError={() => handleImageLoad(banner.id)}
+                    />
+                  )}
+                  <div className={styles.textOverlay}>
+                    <div className={styles.overlayContent}>
+                      <h3 className={styles.cardTitle}>{banner.title}</h3>
+                      <p className={styles.cardDescription}>{banner.description}</p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </Image.PreviewGroup>
       {bannerList.length === 0 && !loading && (
         <div className={styles.emptyContainer}>
           <p>暂无数据</p>

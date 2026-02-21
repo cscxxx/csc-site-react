@@ -55,7 +55,7 @@ function AppLayout() {
 
   const [userOpenKeys, setUserOpenKeys] = useState<string[]>([]);
   const openKeys = userOpenKeys;
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <Layout className={styles.layout}>
