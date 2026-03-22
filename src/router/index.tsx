@@ -32,6 +32,7 @@ const Project = lazy(() => import('@/pages/Project'));
 const Blog = lazy(() => import('@/pages/Blog/index.tsx'));
 const BlogDetailPage = lazy(() => import('@/pages/Blog/BlogDetailPage/index.tsx'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
+const FormLayout = lazy(() => import('@/pages/FormLayout'));
 
 export const router = createBrowserRouter([
   // 主布局路由：所有页面均在 AppLayout 下
@@ -87,6 +88,10 @@ export const router = createBrowserRouter([
       {
         path: 'blog/:id',
         element: <LazyRoute component={BlogDetailPage} />,
+      },
+      {
+        path: 'form-layout',
+        element: <LazyRoute component={FormLayout} />,
       },
     ],
   },

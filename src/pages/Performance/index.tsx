@@ -80,22 +80,21 @@ function Performance() {
 
       <Card title="查询条件" size="small" className={styles.filterCard}>
         <Form form={form} layout="inline" onFinish={onSearch} style={{ flexWrap: 'wrap', gap: 8 }}>
-          <Form.Item name="dateRange" label="日期时间范围">
+          <Form.Item name="dateRange" colon={false} label="日期时间范围">
             <DatePicker.RangePicker
               allowClear
               showTime={{ format: TIME_FORMAT }}
               format={DATETIME_FORMAT}
-              style={{ width: 360 }}
             />
           </Form.Item>
           <Form.Item name="visitorId" label="访客 ID">
-            <Input placeholder="模糊匹配" allowClear style={{ width: 160 }} />
+            <Input placeholder="模糊匹配" allowClear />
           </Form.Item>
           <Form.Item name="pageUrl" label="页面 URL">
-            <Input placeholder="模糊匹配" allowClear style={{ width: 200 }} />
+            <Input placeholder="模糊匹配" allowClear />
           </Form.Item>
           <Form.Item name="ip" label="IP">
-            <Input placeholder="模糊匹配" allowClear style={{ width: 140 }} />
+            <Input placeholder="模糊匹配" allowClear />
           </Form.Item>
           <Form.Item>
             <Space>

@@ -13,6 +13,7 @@ import {
   InfoCircleOutlined,
   MessageOutlined,
   ProjectOutlined,
+  FormOutlined,
 } from '@ant-design/icons';
 
 export function useSideMenu(): MenuProps['items'] {
@@ -57,6 +58,11 @@ export function useSideMenu(): MenuProps['items'] {
         key: '/performance',
         icon: <BarChartOutlined />,
         label: '性能监控',
+      },
+      {
+        key: '/form-layout',
+        icon: <FormOutlined />,
+        label: '表单布局',
       },
     ],
     []
